@@ -1,0 +1,24 @@
+[package]
+name = "rust-alignbench"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+libwfa = { git = "https://github.com/chfi/rs-wfa/" }
+rust-wfa2 = { git = "https://github.com/rchikhi/rust-wfa2/" }
+wfa = { git = "https://github.com/ekimb/wfa" }
+block-aligner = { version = "^0.2.0", features = ["simd_avx2"] }
+
+[dev-dependencies]
+criterion = "0.4.0"
+rand = { version = "^0.8", default-features = false, features = ["std_rng", "alloc"] }
+bio = "^0.33"
+parasailors = "^0.3.1"
+
+[[bench]]
+name = "bench"
+harness = false
+
+[features]
+# Enable AVX2
+simd_avx2 = []

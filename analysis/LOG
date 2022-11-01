@@ -1,0 +1,22 @@
+$ \time python analyze.py  instances-human-HG002.100k.aln
+
+file: instances-human-HG002.100k.aln
+median, mean, stdev
+length differences (in % of longest seq): 0.05420054200542006 1.7390079132526597 5.676782049067113
+divergences (edit distance / longest) : 1.8431001890359167 9.704954528680254 16.0386954243521
+860.53user 0.11system 14:23.42elapsed 99%CPU (0avgtext+0avgdata 17288maxresident)k
+188976inputs+0outputs (0major+3378minor)pagefaults 0swaps
+(base) [rchikhi@maestro-2499 analysis]$ \time python analyze.py  instances-simhuman-10X.100k.aln
+
+
+
+
+\time python analyze.py  instances-simhuman-10X.100k.aln
+
+file: instances-simhuman-10X.100k.aln
+median, mean, stdev
+length differences (in % of longest seq): 0.5915215886913047 1.4901186626264222 3.261758204219867
+divergences (edit distance / longest) : 2.547770700636943 7.576860480734285 11.862513290258576
+231.58user 0.06system 3:52.37elapsed 99%CPU (0avgtext+0avgdata 17264maxresident)k
+140096inputs+0outputs (0major+2704minor)pagefaults 0swaps
+
