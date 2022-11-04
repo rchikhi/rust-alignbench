@@ -97,13 +97,21 @@ fn tests() {
     assert!(para_res == block_score);
 
 
-    // wfa2
+    // wfa2 ED
     //let mut wfa2_aligner = WFAlignerGapAffine::new(1, 2, 1, AlignmentScope::Alignment, MemoryModel::MemoryHigh);
     let mut wfa2_aligner = WFAlignerEdit::new(AlignmentScope::Alignment, MemoryModel::MemoryHigh);
     wfa2_aligner.set_heuristic(Heuristic::None);//BandedAdaptive(-10, 10, 1));
     let _wfa2_res = wfa2_aligner.align_end_to_end(&q, &r);
     println!("wfa2 ed: {}", wfa2_aligner.score());
     assert!(wfa2_aligner.score() as u32 == bio_res3);
+
+    // wfa2 NW
+    let mut wfa2_aligner = WFAlignerEdit::new(AlignmentScope::Alignment, MemoryModel::MemoryHigh);
+    wfa2_aligner.set_heuristic(Heuristic::None);//BandedAdaptive(-10, 10, 1));
+    let _wfa2_res = wfa2_aligner.align_end_to_end(&q, &r);
+    println!("wfa2 ed: {}", wfa2_aligner.score());
+    assert!(wfa2_aligner.score() as u32 == bio_res3);
+
 
 
     // ksw2
