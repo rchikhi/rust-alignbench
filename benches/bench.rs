@@ -17,7 +17,9 @@ use libwfa::{affine_wavefront::*, bindings::*, penalties::*};
 
 use rust_wfa2::aligner::*;
 
-fn lowdivalign_bench(c: &mut Criterion) {
+use ksw2_sys::*;
+
+fn lowdivalign_bench(crit: &mut Criterion) {
 
     let divergence = 0.07;
 
@@ -48,8 +50,23 @@ fn lowdivalign_bench(c: &mut Criterion) {
         gap_extension: 2,
     };*/
 
+    // preparation for ksw2
+    let a = 1;
+    let b = -2;
+    let mat = [ a,b,b,b,0, b,a,b,b,0, b,b,a,b,0, b,b,b,a,0, 0,0,0,0,0 ];
+    let mut ez : ksw_extz_t = unsafe { std::mem::zeroed() };
+    let mut c: [u8; 256] = [0; 256];
+    c['A' as usize] = 0; c['a' as usize] = 0; c['C' as usize] = 1; c['c' as usize] = 1;
+    c['G' as usize] = 2; c['g' as usize] = 2; c['T' as usize] = 3; c['t' as usize] = 3; // build the encoding table
+    let qs : Vec<u8> = q.iter().map(|x| c[*x as usize]).collect();
+    let ts : Vec<u8> = r.iter().map(|x| c[*x as usize]).collect();
+    let ql = qs.len() as i32;
+    let tl = ts.len() as i32;
+    let gapo = 2;
+    let gape = 1;
 
-    let mut group = c.benchmark_group("BenchmarkGroup");
+
+    let mut group = crit.benchmark_group("BenchmarkGroup");
     group.throughput(Throughput::Bytes(len as u64));
 
     group.bench_with_input(BenchmarkId::new("rust_bio_levenshtein", len), &(&r,&q), |b: &mut Bencher, i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
@@ -77,16 +94,17 @@ fn lowdivalign_bench(c: &mut Criterion) {
     })});
 
     group.bench_with_input(BenchmarkId::new("block_aligner", len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
-        let res = Block::<_, false, false>::align(&q_padded, &r_padded, &NW1, run_gaps, block_size..=block_size, 0);
-        //println!("res {:?}",res.res());
-        black_box(res);
+        let mut block_aligner = Block::<false, false>::new(q_padded.len(), r_padded.len(), block_size);
+        block_aligner.align(&q_padded, &r_padded, &NW1, run_gaps, block_size..=block_size, 0);
+        let block_score = block_aligner.res().score as u32;
+        black_box(block_score);
     })});
 
     // libwfa doesn't play well with wfa2
     // if one is uncommented, the other needs to be commented,
     // else you get mem corruption for some reason
-    group.bench_with_input(BenchmarkId::new("libwfa", len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
-        /*let mut libwfa_wavefronts = AffineWavefronts::new_complete(
+    /*group.bench_with_input(BenchmarkId::new("libwfa", len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
+        let mut libwfa_wavefronts = AffineWavefronts::new_complete(
             q.len(),
             r.len(),
             &mut penalties,
@@ -104,8 +122,8 @@ fn lowdivalign_bench(c: &mut Criterion) {
         let res = libwfa_wavefronts.align(&q, &r);
         //println!("res {:?}",res.res());
         black_box(res);
-        */
     })});
+    */
 
     group.bench_with_input(BenchmarkId::new("wfa2", len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
         let mut wfa2_aligner = WFAlignerGapAffine::new(4, 6, 2, AlignmentScope::Alignment, MemoryModel::MemoryHigh);
@@ -114,6 +132,15 @@ fn lowdivalign_bench(c: &mut Criterion) {
         //println!("res {:?}",res.res());
         black_box(res);
     })});
+
+    group.bench_with_input(BenchmarkId::new("ksw2_etz", len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
+        unsafe { 
+        let res = ksw_extz(std::ptr::null_mut(), ql, qs.as_ptr(), tl, ts.as_ptr(), 5, mat.as_ptr(), gapo, gape, -1, -1, 0, &mut ez);
+        //println!("res {:?}",res.res());
+        black_box(res);
+        }
+    })});
+
 
 
     group.finish();

@@ -10,4 +10,6 @@ A pairwise alignment benchmark of a few libraries:
 
 ## Running
 
-`cargo bench`
+Speed test: `cargo bench`
+
+Alignment test: `cargo test -- --show-output`
