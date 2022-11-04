@@ -70,27 +70,19 @@ fn lowdivalign_bench(crit: &mut Criterion) {
     group.throughput(Throughput::Bytes(len as u64));
 
     group.bench_with_input(BenchmarkId::new("rust_bio_levenshtein", len), &(&r,&q), |b: &mut Bencher, i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
-        let res = bio::alignment::distance::levenshtein(i.0, i.1);
-        //println!("res {:?}",res);
-        black_box(res);
+        black_box(bio::alignment::distance::levenshtein(i.0, i.1));
     })});
 
     group.bench_with_input(BenchmarkId::new("parasailors", len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
-        let res = global_alignment_score(&profile, &r, 2, 1);
-        //println!("res {:?}",res.res());
-        black_box(res);
+        black_box(global_alignment_score(&profile, &r, 2, 1));
     })});
 
     group.bench_with_input(BenchmarkId::new("rust_bio_simd_bounded_levenshtein", len), &(&r,&q), |b: &mut Bencher, i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
-        let res = bounded_levenshtein(i.0, i.1, nb_err as u32);
-        //println!("res {:?}",res);
-        black_box(res);
+        black_box(bounded_levenshtein(i.0, i.1, nb_err as u32));
     })});
 
     group.bench_with_input(BenchmarkId::new("rust_bio_simd_levenshtein", len), &(&r,&q), |b: &mut Bencher, i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
-        let res = levenshtein(i.0, i.1);
-        //println!("res {:?}",res);
-        black_box(res);
+        black_box(levenshtein(i.0, i.1));
     })});
 
     group.bench_with_input(BenchmarkId::new("block_aligner", len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
@@ -129,14 +121,19 @@ fn lowdivalign_bench(crit: &mut Criterion) {
         let mut wfa2_aligner = WFAlignerGapAffine::new(4, 6, 2, AlignmentScope::Alignment, MemoryModel::MemoryHigh);
         wfa2_aligner.set_heuristic(Heuristic::BandedAdaptive(-10, 10, 1));
         let res = wfa2_aligner.align_end_to_end(&q, &r);
-        //println!("res {:?}",res.res());
         black_box(res);
     })});
 
     group.bench_with_input(BenchmarkId::new("ksw2_etz", len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
         unsafe { 
         let res = ksw_extz(std::ptr::null_mut(), ql, qs.as_ptr(), tl, ts.as_ptr(), 5, mat.as_ptr(), gapo, gape, -1, -1, 0, &mut ez);
-        //println!("res {:?}",res.res());
+        black_box(res);
+        }
+    })});
+
+    group.bench_with_input(BenchmarkId::new("ksw2_extz2_sse", len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
+        unsafe { 
+        let res = ksw_extz2_sse(std::ptr::null_mut(), ql, qs.as_ptr(), tl, ts.as_ptr(), 5, mat.as_ptr(), gapo, gape, -1, -1, 10, 0, &mut ez);
         black_box(res);
         }
     })});
