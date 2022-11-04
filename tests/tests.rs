@@ -65,45 +65,49 @@ fn tests() {
     let gape = 1;
 
 
-        let bio_res = bio::alignment::distance::levenshtein(&r,&q);
+    // rust-bio standard ED
+    let bio_res = bio::alignment::distance::levenshtein(&r,&q);
 
-        let bio_res2 = bounded_levenshtein(&r,&q, nb_err as u32).unwrap();
+    // rust-bio standard ED, bounded
+    let bio_res2 = bounded_levenshtein(&r,&q, nb_err as u32).unwrap();
+    assert!(bio_res == bio_res2);
 
-        assert!(bio_res == bio_res2);
+    // rust-bio SIMD
+    let bio_res3 = levenshtein(&r,&q);
+    assert!(bio_res == bio_res3);
+    println!("rust-bio edit distance: {}", bio_res3);
 
-        let bio_res3 = levenshtein(&r,&q);
-        
-        assert!(bio_res == bio_res3);
-        
-        println!("edit distance: {}", bio_res3);
-        
-        let para_res = global_alignment_score(&profile, &r, 2, 1) as u32;
-       
-        println!("parasail similarity: {}", para_res);
-        // parasail computes NW with fixed matrix (Identity or IdentityWithPenalty), 
-        // can't have it output edit distance
-        // parasailors also doesn't support outputting cigar
 
-        let mut block_aligner = Block::<true, false>::new(q_padded.len(), r_padded.len(), block_size);
-        block_aligner.align(&q_padded, &r_padded, &NW1, run_gaps, block_size..=block_size, 0);
-        let block_score = block_aligner.res().score as u32;
-        println!("block_aligner similarity: {}", block_score);
+    // parasail
+    let para_res = global_alignment_score(&profile, &r, 2, 1) as u32;
+    println!("parasail similarity: {}", para_res);
+    // parasail computes NW with fixed matrix (Identity or IdentityWithPenalty), 
+    // can't have it output edit distance
+    // parasailors also doesn't support outputting cigar
 
-        let mut block_cigar = block_aligner::cigar::Cigar::new(q_padded.len() as usize, r_padded.len() as usize);
-        block_aligner.trace().cigar(q_padded.len(), r_padded.len(), &mut block_cigar);
-        println!("block_aligner cigar:\n{}", block_cigar.to_string());
 
-        assert!(para_res == block_score);
+    // block-aligner
+    let mut block_aligner = Block::<true, false>::new(q_padded.len(), r_padded.len(), block_size);
+    block_aligner.align(&q_padded, &r_padded, &NW1, run_gaps, block_size..=block_size, 0);
+    let block_score = block_aligner.res().score as u32;
+    println!("block_aligner similarity: {}", block_score);
+    let mut block_cigar = block_aligner::cigar::Cigar::new(q_padded.len() as usize, r_padded.len() as usize);
+    block_aligner.trace().cigar(q_padded.len(), r_padded.len(), &mut block_cigar);
+    println!("block_aligner cigar:\n{}", block_cigar.to_string());
+    assert!(para_res == block_score);
 
-        //let mut wfa2_aligner = WFAlignerGapAffine::new(1, 2, 1, AlignmentScope::Alignment, MemoryModel::MemoryHigh);
-        let mut wfa2_aligner = WFAlignerEdit::new(AlignmentScope::Alignment, MemoryModel::MemoryHigh);
-        wfa2_aligner.set_heuristic(Heuristic::None);//BandedAdaptive(-10, 10, 1));
-        let _wfa2_res = wfa2_aligner.align_end_to_end(&q, &r);
-        println!("wfa2 ed: {}", wfa2_aligner.score());
 
-        assert!(wfa2_aligner.score() as u32 == bio_res3);
+    // wfa2
+    //let mut wfa2_aligner = WFAlignerGapAffine::new(1, 2, 1, AlignmentScope::Alignment, MemoryModel::MemoryHigh);
+    let mut wfa2_aligner = WFAlignerEdit::new(AlignmentScope::Alignment, MemoryModel::MemoryHigh);
+    wfa2_aligner.set_heuristic(Heuristic::None);//BandedAdaptive(-10, 10, 1));
+    let _wfa2_res = wfa2_aligner.align_end_to_end(&q, &r);
+    println!("wfa2 ed: {}", wfa2_aligner.score());
+    assert!(wfa2_aligner.score() as u32 == bio_res3);
 
-        unsafe { 
+
+    // ksw2
+    unsafe { 
         let res = ksw_extz(std::ptr::null_mut(), ql, qs.as_ptr(), tl, ts.as_ptr(), 5, mat.as_ptr(), gapo, gape, -1, -1, 0, &mut ez);
         println!("ksw2 similarity: {}", ez.score);
         println!("ksw2 cigar:");
@@ -112,6 +116,6 @@ fn tests() {
             print!("{}{}", cigar[i]>>4, "MID".chars().nth((cigar[i]&0xf) as usize).unwrap());
         }
         println!("");
-        }
+    }
 
 }

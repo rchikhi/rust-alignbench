@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate criterion;
 
-
 use rand::prelude::*;
 use criterion::{Bencher, Criterion, Throughput, BenchmarkId, black_box};
 
@@ -13,7 +12,7 @@ use bio::alignment::distance::simd::{bounded_levenshtein, levenshtein};
 
 use parasailors::{Matrix, *};
 
-use libwfa::{affine_wavefront::*, bindings::*, penalties::*};
+//use libwfa::{affine_wavefront::*, bindings::*, penalties::*};
 
 use rust_wfa2::aligner::*;
 
