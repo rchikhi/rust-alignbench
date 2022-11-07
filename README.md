@@ -14,3 +14,7 @@ A pairwise alignment benchmark of a few libraries:
 Speed test: `cargo bench`
 
 Alignment test: `cargo test -- --show-output`
+
+## Speed results
+
+![](analysis/out.png)
