@@ -125,7 +125,7 @@ fn lowdivalign_bench(crit: &mut Criterion) {
             black_box(res);
         })});
 
-        group.bench_with_input(BenchmarkId::new(divname("ksw2_etz"), len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
+        group.bench_with_input(BenchmarkId::new(divname("ksw2_extz"), len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
             unsafe { 
                 let res = ksw_extz(std::ptr::null_mut(), ql, qs.as_ptr(), tl, ts.as_ptr(), 5, mat.as_ptr(), gapo, gape, -1, -1, 0, &mut ez);
                 black_box(res);
