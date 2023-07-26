@@ -1,6 +1,6 @@
 use rand::prelude::*;
 
-use block_aligner::simulate::*;
+use simulate_seqs::*;
 use block_aligner::scan_block::*;
 use block_aligner::scores::*;
 
@@ -13,6 +13,8 @@ use parasailors::{Matrix, *};
 use rust_wfa2::aligner::*;
 
 use ksw2_sys::*;
+
+use Scrooge_sys::*;
 
 #[test]
 fn tests() {
@@ -63,6 +65,17 @@ fn tests() {
     let tl = ts.len() as i32;
     let gapo = 2;
     let gape = 1;
+
+    // preparation for scrooge
+    let scrooge_w = 64; // W
+    let scrooge_k = 64; // K
+    let bitvectors_per_element: usize = 1;
+    let scrooge_columns: usize = scrooge_w + 1;
+    let scrooge_rows: usize = scrooge_k + 1;
+    let scrooge_r_bitvectors: usize = scrooge_columns * scrooge_rows * bitvectors_per_element;
+    let mut scrooge_r : Vec<genasm_cpu_halfbitvector> = vec![genasm_cpu_bitvector::default(); scrooge_r_bitvectors];
+    let mut scrooge_forefront: Vec<genasm_cpu_bitvector> = vec![genasm_cpu_bitvector::default(); scrooge_w+1];
+    let mut scrooge_cigar: Vec<u8> = vec![0; (ql * 4 + 1) as usize];
 
 
     // rust-bio standard ED
@@ -124,6 +137,13 @@ fn tests() {
             print!("{}{}", cigar[i]>>4, "MID".chars().nth((cigar[i]&0xf) as usize).unwrap());
         }
         println!("");
+    }
+
+    // scrooge
+    unsafe { 
+        let res = genasm_cpu_genasm(tl as usize, ts.as_ptr() as *mut i8, ql as usize, qs.as_ptr() as *mut i8, 
+                                    scrooge_r.as_mut_ptr(), scrooge_forefront.as_mut_ptr(), scrooge_cigar.as_mut_ptr() as *mut i8);
+        println!("scrooge ed: {}", res);
     }
 
 }

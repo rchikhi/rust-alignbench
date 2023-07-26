@@ -4,7 +4,7 @@ extern crate criterion;
 use rand::prelude::*;
 use criterion::{Bencher, Criterion, Throughput, BenchmarkId, black_box};
 
-use block_aligner::simulate::*;
+use simulate_seqs::*;
 use block_aligner::scan_block::*;
 use block_aligner::scores::*;
 
@@ -17,6 +17,8 @@ use parasailors::{Matrix, *};
 use rust_wfa2::aligner::*;
 
 use ksw2_sys::*;
+
+use Scrooge_sys::*;
 
 fn lowdivalign_bench(crit: &mut Criterion) {
 
@@ -66,7 +68,18 @@ fn lowdivalign_bench(crit: &mut Criterion) {
         let gapo = 2;
         let gape = 1;
 
+        // preparation for scrooge
+        let scrooge_w = 64; // W
+        let scrooge_k = 64; // K
+        let bitvectors_per_element: usize = 1;
+        let scrooge_columns: usize = scrooge_w + 1;
+        let scrooge_rows: usize = scrooge_k + 1;
+        let scrooge_r_bitvectors: usize = scrooge_columns * scrooge_rows * bitvectors_per_element;
+        let mut scrooge_r : Vec<genasm_cpu_halfbitvector> = vec![genasm_cpu_bitvector::default(); scrooge_r_bitvectors];
+        let mut scrooge_forefront: Vec<genasm_cpu_bitvector> = vec![genasm_cpu_bitvector::default(); scrooge_w+1];
+        let mut scrooge_cigar: Vec<u8> = vec![0; (ql * 4 + 1) as usize];
 
+        // now on to the benchmark
         let mut group = crit.benchmark_group("BenchmarkGroup");
         group.throughput(Throughput::Bytes(len as u64));
 
@@ -138,6 +151,15 @@ fn lowdivalign_bench(crit: &mut Criterion) {
                 black_box(res);
             }
         })});
+
+        group.bench_with_input(BenchmarkId::new(divname("scrooge"), len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
+            unsafe { 
+                let res = genasm_cpu_genasm(tl as usize, ts.as_ptr() as *mut i8, ql as usize, qs.as_ptr() as *mut i8, 
+                                            scrooge_r.as_mut_ptr(), scrooge_forefront.as_mut_ptr(), scrooge_cigar.as_mut_ptr() as *mut i8);
+                black_box(res);
+            }
+        })});
+
 
     group.finish();
 

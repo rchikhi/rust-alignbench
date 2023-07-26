@@ -1,6 +1,8 @@
 # Runtime analysis
 
-Run:
+Install `criterion`: `cargo install cargo-criterion`
+
+Then run:
     
     `cargo criterion --message-format=json | tee bench_results.json` 
 
