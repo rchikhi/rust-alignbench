@@ -4,13 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-libwfa = { git = "https://github.com/chfi/rs-wfa/" }
+#libwfa = { git = "https://github.com/chfi/rs-wfa/" } # leaving it commented for now, it doesn't play well with WFA2, but also, that repo has broken submodule
 rust-wfa2 = { git = "https://github.com/rchikhi/rust-wfa2/" }
 wfa = { git = "https://github.com/ekimb/wfa" }
 #block-aligner = { version = "^0.2.0", features = ["simd_avx2"] }
 # code has changed since 0.2.0, need to reference the git now:
 block-aligner = { git = "https://github.com/Daniel-Liu-c0deb0t/block-aligner/", features = ["simd_avx2"] }
 ksw2-sys = { git = "https://github.com/rchikhi/ksw2-sys/" }
+Scrooge-sys = { git = "https://github.com/rchikhi/Scrooge-sys/" }
 
 [dev-dependencies]
 criterion = "0.4.0"
