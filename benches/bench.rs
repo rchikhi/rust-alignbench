@@ -53,6 +53,10 @@ fn lowdivalign_bench(crit: &mut Criterion) {
           gap_extension: 2,
           };*/
 
+        // preparation for wfa2
+        let mut wfa2_aligner = WFAlignerGapAffine::new(4, 6, 2, AlignmentScope::Alignment, MemoryModel::MemoryHigh);
+        wfa2_aligner.set_heuristic(Heuristic::BandedAdaptive(-10, 10, 1));
+
         // preparation for ksw2
         let a = 1;
         let b = -2;
@@ -132,8 +136,6 @@ fn lowdivalign_bench(crit: &mut Criterion) {
         */
 
         group.bench_with_input(BenchmarkId::new(divname("wfa2"), len), &(&r,&q), |b: &mut Bencher, _i: &(&Vec<u8>,&Vec<u8>)| { b.iter(|| {
-            let mut wfa2_aligner = WFAlignerGapAffine::new(4, 6, 2, AlignmentScope::Alignment, MemoryModel::MemoryHigh);
-            wfa2_aligner.set_heuristic(Heuristic::BandedAdaptive(-10, 10, 1));
             let res = wfa2_aligner.align_end_to_end(&q, &r);
             black_box(res);
         })});
