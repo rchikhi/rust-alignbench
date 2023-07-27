@@ -12,8 +12,7 @@ wfa = { git = "https://github.com/ekimb/wfa" }
 block-aligner = { git = "https://github.com/Daniel-Liu-c0deb0t/block-aligner/", features = ["simd_avx2"] }
 simulate-seqs = { git = "https://github.com/Daniel-Liu-c0deb0t/simulate-seqs" }
 ksw2-sys = { git = "https://github.com/rchikhi/ksw2-sys/" }
-#Scrooge-sys = { git = "https://github.com/rchikhi/Scrooge-sys/" }
-Scrooge-sys = { path = "/home/rayan/Scrooge-sys" }
+Scrooge-sys = { git = "https://github.com/rchikhi/Scrooge-sys/" }
 
 [dev-dependencies]
 criterion = "0.4.0"
